@@ -1,0 +1,153 @@
+#login,
+#player {
+	display: none;
+
+}
+
+#loggedin {
+	backdrop-filter: brightness(0.3) grayscale(0.7) saturate(2) sepia(0.2);
+	border-radius: 6em;
+	width: 31.01em;
+}
+
+html {
+	font-family: sans-serif;
+	-ms-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%
+}
+
+.container {
+	border-radius: 6em;
+	background-position: 50%;
+	background-size: 100%;
+	border: 3px solid #1a1527;
+	width: 31em;
+}
+
+.fadingin {
+
+	animation: fadein 1s, movingbackground 60s infinite linear;
+	animation-fill-mode: forwards;
+
+}
+
+.fadingout {
+	animation: fadeout 1s;
+	animation-fill-mode: forwards;
+}
+
+.progressbar {
+
+	height: 1em;
+	width: 65%;
+	background: #0d01369c;
+	margin-left: 110px;
+	border-radius: 5em;
+	border: 2px solid #1a1527;
+
+
+}
+
+.progressbar .progressvalue {
+	height: 1em;
+	background: #1f1f4ee7;
+	border-radius: 10em;
+	width: 0%;
+	transition: width 1s linear;
+}
+
+dt,
+dd {
+	line-height: 1.42857143
+}
+
+dt {
+	font-weight: 500
+}
+
+dd {
+	margin-left: 0
+}
+
+.title {
+
+	font-size: 2em;
+	color: #b1b1ad;
+	text-shadow: 0 0 0.1em rgb(26, 24, 39), 0 0 0.1em rgb(26, 24, 39), 0 0 0.1em rgb(26, 24, 39);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 600;
+}
+
+.artist {
+	font-size: 1.2em;
+	height: 1.65em;
+	color: #b1b1ad;
+	text-shadow: 0 0 0.05em rgb(26, 24, 39), 0 0 0.05em rgb(26, 24, 39), 0 0 0.05em rgb(26, 24, 39);
+	padding-top: 0.4em;
+	padding-right: 1em;
+	font-weight: 600;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.media-object {
+	border-color: #1a1527;
+	border-radius: 50%;
+	animation: rotation 30s infinite linear;
+}
+
+.media>.pull-left {
+	margin-right: 10px;
+}
+
+.pull-left {
+	float: left !important;
+}
+
+@keyframes movingbackground {
+	0% {
+		background-size: 100%;
+	}
+
+	50% {
+		background-size: 150%;
+	}
+
+	100% {
+		background-size: 100%;
+	}
+
+}
+
+@keyframes rotation {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(359deg);
+	}
+}
+
+@keyframes fadein {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeout {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}

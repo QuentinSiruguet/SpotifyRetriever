@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>SpotifyRetriever</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body style="background-color: rgba(0, 0, 0, 0);">
+  <div class="container" id="player">
+    <div id="login">
+      <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+    </div>
+    <div id="loggedin">
+      <div id="user-profile">
+      </div>
+      <div id="oauth">
+      </div>
+    </div>
+  </div>
+
+  <script id="user-profile-template" type="text/x-handlebars-template">
+	  <div id="spotify">
+         <div class="media">
+           <div class="pull-left">
+             <img class="media-object" width="97" src="{{item.album.images.0.url}}" border="4em"/>
+           </div>
+         <dt class="title">{{item.name}}</dt>
+         <div class ="progressbar">
+           <div class="progressvalue" id="progress" style="width:{{progressbar_value}}"></div>           
+         </div>
+		     <dt class="artist" id="artist">{{item.artists.0.name}}</dt>
+        </div>
+	  </div>
+  </script>
+
+  <script id="oauth-template" type="text/x-handlebars-template"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+
+  <script>
+    const getHashParams = () => {
+      const query = window.location.hash.substring(1);
+      const results = [...query.matchAll(/([^&;=]+)=?([^&;]*)/g)];
+      return Object.fromEntries(results.map(([, key, value]) => [key, decodeURIComponent(value)]));
+    }
+
+    const userProfileSource = document.getElementById('user-profile-template').innerHTML;
+    const userProfileTemplate = Handlebars.compile(userProfileSource);
+    const userProfilePlaceholder = document.getElementById('user-profile');
+
+    const oauthSource = document.getElementById('oauth-template').innerHTML;
+    const oauthTemplate = Handlebars.compile(oauthSource);
+    const oauthPlaceholder = document.getElementById('oauth');
+
+    let { access_token, refresh_token, error } = getHashParams();
+
+    const firstRun = () => {
+      if (error) {
+        return alert('There was an error during the authentication');
+      }
+      if (!access_token) {
+        document.getElementById('login').style.display = "block";
+        document.getElementById('player').style.display = "block";
+        document.getElementById('loggedin').style.display = "none";
+        return;
+      }
+      oauthPlaceholder.innerHTML = oauthTemplate();
+
+      setInterval(() => updatePlayer(), 1000);
+    }
+
+    let previousid = null;
+    let previousstate;
+    const updatePlayer = async () => {
+      const playingRequest = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        headers: {
+          Authorization: 'Bearer ' + access_token
+        },
+      });
+
+      const { item, progress_ms, is_playing, error } = await playingRequest.json();
+
+      if (error && error.status === 401) {
+        const refreshRequest = await fetch(`/refresh_token?refresh_token=${refresh_token}`, {
+          method: 'POST'
+        });
+        const refreshData = await refreshRequest.json();
+
+        access_token = refreshData.access_token;
+        refresh_token = refreshData.refresh_token;
+      }
+
+      document.getElementById('player').style.display = "block";
+
+
+      if (previousstate != is_playing && is_playing) {
+        document.getElementById('player').classList.remove("fadingout");
+        document.getElementById('player').classList.add("fadingin");
+        document.getElementById('player').classList.add("movingbackground");
+      }
+      else if (previousstate != is_playing && !is_playing) {
+        document.getElementById('player').classList.remove("fadingin");
+        document.getElementById('player').classList.add("fadingout");
+      }
+      previousstate = is_playing;
+
+      if (item.id === previousid) {
+        const progress = document.getElementById('progress');
+        progress.style.width = `${(progress_ms * 100 / item.duration_ms)}%`;
+        return;
+      }
+
+      previousid = item.id;
+
+      document.getElementById('player').style.backgroundImage = `url(${item.album.images[0].url})`;
+
+      userProfilePlaceholder.innerHTML = userProfileTemplate({
+        item,
+        progress: `${progress_ms * 100 / item.duration_ms}%`
+      });
+
+      if (item.artists.length > 1) {
+        for (let i = 1; i < item.artists.length; i++) {
+          document.getElementById('artist').innerText += " - " + item.artists[i].name;
+        }
+      }
+    }
+    firstRun();
+  </script>
+</body>
+
+</html>
